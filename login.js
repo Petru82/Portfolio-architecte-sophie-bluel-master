@@ -1,17 +1,14 @@
 const email = document.querySelector("form #email");
 const password = document.querySelector("form #password");
-
 const loginForm = document.querySelector("form");
-
-const emailUser = email.value;
-const passwordUser = password.value;
 
 // Fonction pour gérer la connexion
 async function connection(event) {
   event.preventDefault(); // Empêcher le rechargement de la page
 
   // Récupérer les valeurs des champs email et password
-
+  const emailUser = email.value;
+  const passwordUser = password.value;
   // Préparer les données à envoyer au backend
   const data = {
     email: emailUser,

@@ -57,7 +57,7 @@ function updateLoginLogoutText() {
 
   if (isConnected()) {
     loginLogoutLi.textContent = "logout";
-    loginLogoutLi.addEventListener("click", deconnection);
+    loginLogoutLi.addEventListener("click", connection);
   } else {
     loginLogoutLi.textContent = "login";
     loginLogoutLi.addEventListener("click", function () {

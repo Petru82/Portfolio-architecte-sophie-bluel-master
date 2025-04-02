@@ -34,17 +34,27 @@ function displayProjects(projects) {
 function deconnection() {
   if (loged) {
     navLogin.addEventListener("click", () => {
-      alert("Je suis connecte");
+      // Si je click sur navLogin (actuellement logout) :
+      window.localStorage.removeItem("token"); // supprime le token du local storage
+      self.location.replace("http://127.0.0.1:5500/index.html"); // actualisation de la page
+      navLogin.textContent = "login"; // change le text de la balise qui contenait "logout" en "login"
     });
   }
 
   // Supprimer le token du Local Storage
-  // localStorage.removeItem("token");
+  localStorage.removeItem("token");
 
   // Rediriger l'utilisateur vers la page de connexion ou une autre page appropriée
   window.location.href = "login.html";
 }
 
+function logoutMod() {
+  if (loged) {
+    navLogin.textContent = "logout";
+  }
+}
+
 // Appeler la fonction pour récupérer les projets
 fetchProjects();
 deconnection();
+logoutMod();

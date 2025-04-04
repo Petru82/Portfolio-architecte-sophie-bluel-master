@@ -297,3 +297,26 @@ footer nav ul {
   width: 139px;
   margin: auto;
 }
+
+/* Style du formulaire */
+.filter-form {
+  text-align: center;
+  margin: 50px;
+}
+
+.filter-form button {
+  height: 37px;
+  font-size: 16px;
+  color: #1d6154;
+  background-color: #fff;
+  border: 1px solid #1d6154;
+  border-radius: 60px;
+  padding: 10px 27px;
+  margin: 0 10px;
+  cursor: pointer;
+}
+
+.filter-form button:hover {
+  background-color: #1d6154;
+  color: #fff;
+}

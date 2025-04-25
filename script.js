@@ -1,142 +1,95 @@
-const url = "http://localhost:5678/api-docs/";
-const loged = window.localStorage.getItem("token");
-const navLogin = document.querySelector(".login");
+// Config
+const API_URL = "http://localhost:5678/api/works";
+const CATEGORIES_URL = "http://localhost:5678/api/categories";
 
-// Fonction pour récupérer les projets
-async function fetchProjects() {
-  try {
-    const response = await fetch(url); // Effectuer la requête GET
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP ! Statut : ${response.status}`); // Gérer les erreurs HTTP
-    }
-    const projects = await response.json(); // Convertir la réponse en JSON
-    console.log("Projets récupérés:", projects); // Afficher les projets dans la console
+// Éléments DOM
+let navLogin, containerFilters, gallery;
 
-    // Vous pouvez maintenant traiter les données comme vous le souhaitez
-    displayProjects(projects); // Appel d'une fonction pour afficher les projets sur la page
-  } catch (error) {
-    console.error("Erreur lors de la récupération des projets:", error); // Gérer les erreurs
-  }
-}
+// Auth
+function setupAuth() {
+  navLogin = document.querySelector(".login");
+  if (!navLogin) return;
 
-// Fonction pour afficher les projets sur la page (exemple)
-function displayProjects(projects) {
-  const projectsContainer = document.getElementById("projects-container"); // Assurez-vous d'avoir cet élément dans votre HTML
-  projects.forEach((project) => {
-    const projectElement = document.createElement("div");
-    projectElement.className = "project";
-    projectElement.innerHTML = `<h3>${project.title}</h3><p>${project.description}</p>`;
-    projectsContainer.appendChild(projectElement);
-  });
-}
+  navLogin.textContent = localStorage.getItem("token") ? "logout" : "login";
 
-// Fonction pour se déconnecter
-function deconnection() {
-  if (loged) {
-    navLogin.addEventListener("click", () => {
-      // Supprimer le token du localStorage
-      window.localStorage.removeItem("token");
-
-      // Rediriger vers la page de connexion
+  navLogin.addEventListener("click", (e) => {
+    if (localStorage.getItem("token")) {
+      e.preventDefault();
+      localStorage.removeItem("token");
       window.location.href = "login.html";
-
-      // Modifier le texte du bouton navLogin
-      navLogin.textContent = "login";
-    });
-  }
+    }
+  });
 }
 
-// Fonction pour changer le texte du bouton selon l'état
-function logoutMod() {
-  if (loged) {
-    navLogin.textContent = "logout";
-  } else {
-    navLogin.textContent = "login";
-  }
-}
-
-// Appeler les fonctions au bon moment
-logoutMod();
-deconnection();
-
-//! Déclaration des éléments DOM
-const containerFilters = document.querySelector(".filter-form");
-const gallery = document.querySelector(".gallery");
-
-// 1. Récupération des projets
+// Projets
 async function getProjects() {
-  const response = await fetch("http://localhost:5678/api/works");
-  return await response.json();
+  try {
+    const response = await fetch(API_URL);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur getProjects:", error);
+    return [];
+  }
 }
 
-// 2. Récupération des catégories
-async function getCategory() {
-  const response = await fetch("http://localhost:5678/api/categories");
-  return await response.json();
+function renderProjects(projects) {
+  gallery.innerHTML = projects
+    .map(
+      (project) => `
+    <div class="project">
+      <img src="${project.imageUrl}" alt="${project.title}">
+      <h3>${project.title}</h3>
+      ${project.description ? `<p>${project.description}</p>` : ""}
+    </div>
+  `
+    )
+    .join("");
 }
 
-// 3. Création des boutons de filtre
-async function createButton() {
-  const categoryTable = await getCategory();
+// Filtres
+async function createFilters() {
+  const categories = await fetch(CATEGORIES_URL).then((r) => r.json());
 
-  // Ajout du bouton "Tous"
-  const allButton = document.createElement("button");
-  allButton.textContent = "Tous";
-  allButton.id = "0"; // ID spécial pour "Tous"
-  containerFilters.appendChild(allButton);
-
-  // Ajout des autres boutons
-  categoryTable.forEach((category) => {
-    const button = document.createElement("button");
-    button.textContent = category.name;
-    button.id = category.id;
-    containerFilters.appendChild(button);
-  });
-}
-
-// 4. Affichage des projets
-function createProjects(project) {
-  const projectElement = document.createElement("div");
-  projectElement.className = "project";
-  projectElement.innerHTML = `
-    <h3>${project.title}</h3>
-    <p>${project.description || ""}</p>
-    <img src="${project.imageUrl}" alt="${project.title}">
+  containerFilters.innerHTML = `
+    <button data-filter="all">Tous</button>
+    ${categories
+      .map((cat) => `<button data-filter="${cat.id}">${cat.name}</button>`)
+      .join("")}
   `;
-  gallery.appendChild(projectElement);
 }
 
-// 5. Filtrage des projets
-async function filteredButton() {
+// Initialisation
+async function init() {
+  // Éléments DOM
+  navLogin = document.querySelector(".login");
+  containerFilters = document.querySelector(".filter-form");
+  gallery = document.querySelector(".gallery");
+
+  if (!containerFilters || !gallery) {
+    console.error("Éléments DOM manquants");
+    return;
+  }
+
+  await createFilters();
   const projects = await getProjects();
-  // Correction du sélecteur pour cibler les boutons dans .filter-form
-  const buttons = document.querySelectorAll(".filter-form button");
+  renderProjects(projects);
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", (event) => {
-      gallery.innerHTML = "";
-      const buttonId = event.target.id;
+  // Gestion filtres
+  containerFilters.addEventListener("click", (e) => {
+    const filter = e.target.dataset.filter;
+    if (!filter) return;
 
-      if (buttonId !== "0") {
-        const filteredProjects = projects.filter((project) => {
-          return project.category.id == buttonId;
-        });
-        filteredProjects.forEach(createProjects);
-      } else {
-        projects.forEach(createProjects);
-      }
-    });
+    const filtered =
+      filter === "all"
+        ? projects
+        : projects.filter((p) => p.category.id.toString() === filter);
+
+    renderProjects(filtered);
   });
 }
 
-// 6. Initialisation
-async function init() {
-  await createButton();
-  await filteredButton();
-  // Afficher tous les projets au chargement
-  const projects = await getProjects();
-  projects.forEach(createProjects);
-}
-
-// Exécution
-document.addEventListener("DOMContentLoaded", init);
+// Chargement
+document.addEventListener("DOMContentLoaded", () => {
+  setupAuth();
+  init();
+});

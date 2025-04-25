@@ -1,50 +1,58 @@
-const email = document.querySelector("form #email");
-const password = document.querySelector("form #password");
 const loginForm = document.querySelector("form");
+const emailInput = document.querySelector("#email");
+const passwordInput = document.querySelector("#password");
 
 // Fonction pour gérer la connexion
 async function connection(event) {
-  event.preventDefault(); // Empêcher le rechargement de la page
+  event.preventDefault();
 
-  // Récupérer les valeurs des champs email et password
-  const emailUser = email.value;
-  const passwordUser = password.value;
-  // Préparer les données à envoyer au backend
+  // Vérifier l'existence des éléments et des valeurs
+  if (!emailInput || !passwordInput) {
+    alert("Champs email ou mot de passe introuvables !");
+    return;
+  }
+
+  const emailUser = emailInput.value.trim();
+  const passwordUser = passwordInput.value.trim();
+
+  if (!emailUser || !passwordUser) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
+
   const data = {
     email: emailUser,
     password: passwordUser,
   };
 
-  // Envoyer une requête POST au backend pour se connecter
-  const response = await fetch("http://localhost:5678/api/users/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  try {
+    const response = await fetch("http://localhost:5678/api/users/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-  const result = await response.json();
+    const result = await response.json();
 
-  window.localStorage.setItem("token", result.token);
-
-  console.log(result, "resultat");
-
-  // Traiter la réponse du backend
-  if (response.ok) {
-    console.log("Connexion réussie !", result);
-    // Rediriger l'utilisateur vers une autre page ou effectuer d'autres actions
-    window.location.href = "index.html";
-  } else {
-    console.error("Erreur de connexion:", result);
-    // Afficher un message d'erreur à l'utilisateur
-    alert("Informations d'identification incorrectes.");
+    if (response.ok && result.token) {
+      window.localStorage.setItem("token", result.token);
+      window.location.href = "index.html";
+    } else {
+      alert("Informations d'identification incorrectes.");
+    }
+  } catch (error) {
+    console.error("Erreur lors de la connexion :", error);
+    alert("Erreur de connexion au serveur.");
   }
 }
 
-// Ajouter un écouteur d'événement au formulaire pour appeler la fonction connection
-loginForm.addEventListener("submit", connection);
+// Ajouter un écouteur d'événement au formulaire
+if (loginForm) {
+  loginForm.addEventListener("submit", connection);
+}
 
 // Fonction pour vérifier si l'utilisateur est connecté
 function isConnected() {
@@ -54,17 +62,25 @@ function isConnected() {
 // Fonction pour mettre à jour le texte du bouton de connexion/déconnexion
 function updateLoginLogoutText() {
   const loginLogoutLi = document.getElementById("loginLogout");
+  if (!loginLogoutLi) return;
+
+  // On retire tous les anciens écouteurs pour éviter les doublons
+  const newLi = loginLogoutLi.cloneNode(true);
+  loginLogoutLi.parentNode.replaceChild(newLi, loginLogoutLi);
 
   if (isConnected()) {
-    loginLogoutLi.textContent = "logout";
-    loginLogoutLi.addEventListener("click", connection);
+    newLi.textContent = "logout";
+    newLi.addEventListener("click", function () {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    });
   } else {
-    loginLogoutLi.textContent = "login";
-    loginLogoutLi.addEventListener("click", function () {
-      window.location.href = "login.html"; // Rediriger vers la page de connexion
+    newLi.textContent = "login";
+    newLi.addEventListener("click", function () {
+      window.location.href = "login.html";
     });
   }
 }
 
 // Appeler la fonction pour mettre à jour l'affichage au chargement de la page
-updateLoginLogoutText();
+document.addEventListener("DOMContentLoaded", updateLoginLogoutText);

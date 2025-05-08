@@ -200,10 +200,7 @@ li:hover {
 #introduction p {
   margin-bottom: 0.5em;
 }
-#portfolio h2 {
-  text-align: center;
-  margin-bottom: 1em;
-}
+
 .gallery {
   width: 100%;
   display: grid;
@@ -214,6 +211,18 @@ li:hover {
 
 .gallery img {
   width: 100%;
+}
+
+.portfolio-edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 90px;
+}
+
+.galerie-editeur.none {
+  display: none;
 }
 
 #contact {

@@ -5,6 +5,12 @@ const CATEGORIES_URL = "http://localhost:5678/api/categories";
 // Éléments DOM
 let navLogin, containerFilters, gallery;
 
+function toggleEditVisibility() {
+  const editSpan = document.querySelector(".galerie-editeur");
+  if (!editSpan) return;
+  editSpan.classList.toggle("none", !localStorage.getItem("token"));
+}
+
 // Auth
 function setupAuth() {
   navLogin = document.querySelector(".login");
@@ -19,6 +25,14 @@ function setupAuth() {
       window.location.href = "login.html";
     }
   });
+}
+
+// Visibilité des filtres
+function toggleFiltersVisibility() {
+  if (!containerFilters) return;
+  containerFilters.style.display = localStorage.getItem("token")
+    ? "none"
+    : "block";
 }
 
 // Projets
@@ -71,6 +85,9 @@ async function init() {
   }
 
   await createFilters();
+  toggleFiltersVisibility(); // Contrôle initial de visibilité
+  toggleEditVisibility();
+
   const projects = await getProjects();
   renderProjects(projects);
 

@@ -58,14 +58,24 @@
       <section id="portfolio">
         <div class="portfolio-edit">
           <h2>Mes Projets</h2>
-          <span class="galerie-editeur none">
-            <i class="fa-regular fa-pen-to-square"></i>
-            modifier
+          <!-- Bouton pour ouvrir la modale -->
+          <span class="galerie-editeur" id="edit-btn">
+            <i class="fa-regular fa-pen-to-square"></i> modifier
           </span>
+
+          <!-- La modale, en dehors de .gallery -->
+          <div id="modal" class="modal">
+            <div class="modal-content">
+              <span class="close-btn">&times;</span>
+              <h2>Galerie photo</h2>
+              <div id="modal-body"></div>
+            </div>
+          </div>
         </div>
         <form class="filter-form"></form>
         <div class="projets">
           <div class="gallery">
+            <i class="fa-solid fa-trash"></i>
             <figure>
               <img
                 src="assets/images/abajour-tahina.png"

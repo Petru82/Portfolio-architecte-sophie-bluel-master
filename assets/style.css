@@ -201,6 +201,14 @@ li:hover {
   margin-bottom: 0.5em;
 }
 
+.portfolio-edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 90px;
+}
+
 .gallery {
   width: 100%;
   display: grid;
@@ -213,16 +221,80 @@ li:hover {
   width: 100%;
 }
 
-.portfolio-edit {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-  margin-bottom: 90px;
-}
-
 .galerie-editeur.none {
   display: none;
+}
+
+.fa-trash {
+  position: absolute;
+  color: red;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background: #fff;
+  margin: auto;
+  width: 100%;
+  max-width: 630px;
+  position: relative;
+}
+
+.modal-content h2 {
+  display: flex;
+  justify-content: center;
+  color: black;
+  font-family: Work-Sans;
+  font-weight: normal;
+  margin-top: 60px;
+}
+
+#modal-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  justify-content: center;
+  padding: 46px;
+  margin-left: 55px;
+  margin-right: 55px;
+}
+
+#modal-body img {
+  width: 80px;
+  height: 103px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 29px;
+}
+
+.close-btn {
+  position: absolute;
+  right: 25px;
+  top: 25px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.trash-icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
 }
 
 #contact {

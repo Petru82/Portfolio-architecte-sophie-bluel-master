@@ -58,7 +58,7 @@
       <section id="portfolio">
         <div class="portfolio-edit">
           <h2>Mes Projets</h2>
-          <!-- Bouton pour ouvrir la modale -->
+          <!-- Bouton pour ouvrir la modale principale -->
           <span class="galerie-editeur" id="edit-btn">
             <i class="fa-regular fa-pen-to-square"></i> modifier
           </span>
@@ -69,6 +69,57 @@
               <span class="close-btn">&times;</span>
               <h2>Galerie photo</h2>
               <div id="modal-body"></div>
+              <!-- Bouton d'ajout de photo -->
+              <div class="modal-footer">
+                <button id="ajouter-photo-btn">Ajouter une photo</button>
+              </div>
+            </div>
+          </div>
+          <!--  Modale d'ajout de photo-->
+          <div id="add-modal" class="add-project-modal hidden">
+            <div class="modal-content">
+              <span class="add-close-btn">&times;</span>
+              <h2>Ajout photo</h2>
+              <form id="add-form" class="formulaire-ajout">
+                <div class="modale-form">
+                  <div id="image-preview" class="modale-form-logo-image flex">
+                    <i class="fa-solid fa-image"></i>
+                    <img
+                      class="miniature none"
+                      src=""
+                      alt="miniature du fichier image selectionné"
+                    />
+                  </div>
+                  <button class="ajout-image-button flex" type="button">
+                    <label for="image">+ Ajouter photo</label>
+                    <input
+                      type="file"
+                      max-size="4000000"
+                      name="image"
+                      id="image"
+                      accept="image/png, image/jpeg,"
+                      required
+                    />
+                  </button>
+                  <div class="modale-format-images flex">
+                    jpg. png : 4mo max
+                  </div>
+                </div>
+                <label for="title">Titre</label>
+                <input type="text" name="title" id="title" /><br />
+                <label for="category">Catégorie</label>
+                <select name="category" id="category">
+                  <!-- ?
+          ? option,
+          ? option,
+          ? option.
+          ? -->
+                </select>
+                <div class="border-grey"></div>
+                <button type="submit" id="add-form" class="submit-form-btn">
+                  Valider
+                </button>
+              </form>
             </div>
           </div>
         </div>

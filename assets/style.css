@@ -225,12 +225,8 @@ li:hover {
   display: none;
 }
 
-.fa-trash {
-  position: absolute;
-  color: red;
-}
-
-.modal {
+.modal,
+.add-project-modal {
   display: none;
   position: fixed;
   z-index: 1000;
@@ -277,6 +273,114 @@ li:hover {
   margin-bottom: 29px;
 }
 
+.modal-footer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#ajouter-photo-btn {
+  padding: 10px 20px;
+  background-color: #1d6154;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.formulaire-ajout {
+  position: relative;
+  display: flex;
+  flex-direction: column; /* Important pour un affichage vertical */
+  gap: 16px; /* Espace entre les éléments */
+  padding: 46px;
+  margin: 0 94px;
+  border-top: 1px solid #b3b3b3; /* remplace pseudo-élément */
+  background-color: #fff; /* Optionnel : couleur de fond */
+}
+
+.hidden {
+  display: none;
+}
+
+.modale-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border: 2px dashed #ccc;
+  padding: 20px;
+  background-color: #f6f6f6;
+}
+
+.modale-form-logo-image {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.miniature {
+  width: 100px;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+.none {
+  display: none;
+}
+
+.ajout-image-button {
+  position: relative;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  background-color: gray;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  border: none;
+}
+
+.ajout-image-button input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.submit-form-btn {
+  width: 237px;
+  height: 36px;
+  margin: 0 auto;
+  background-color: #1d6154;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
 .close-btn {
   position: absolute;
   right: 25px;
@@ -290,11 +394,25 @@ li:hover {
   display: inline-block;
 }
 
-.trash-icon {
+.fa-trash:before {
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 17px;
+  height: 17px;
+}
+
+.fa-trash {
   position: absolute;
+  color: #fff;
   top: 5px;
   right: 5px;
   cursor: pointer;
+}
+
+.trash-icon i.fa-trash {
+  font-size: 10px;
 }
 
 #contact {

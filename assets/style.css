@@ -234,23 +234,24 @@ li:hover {
   top: 0;
   width: 100%;
   height: 100%;
-  border-radius: 10px;
   background: rgba(0, 0, 0, 0.4);
 }
 
-.modal-content {
+.modal-content, .add-modal-content {
   background: #fff;
   margin: auto;
   width: 100%;
   max-width: 630px;
   position: relative;
+  border-radius: 10px;
 }
 
-.modal-content h2 {
+.modal-content h2, .add-modal-content h2 {
   display: flex;
   justify-content: center;
   color: black;
   font-family: Work-Sans;
+  font-size: 26px;
   font-weight: normal;
   margin-top: 60px;
 }
@@ -261,8 +262,8 @@ li:hover {
   gap: 10px;
   justify-content: center;
   padding: 46px;
-  margin-left: 55px;
-  margin-right: 55px;
+  margin-left: 60px;
+  margin-right: 60px;
 }
 
 #modal-body img {
@@ -273,34 +274,42 @@ li:hover {
   margin-bottom: 29px;
 }
 
+/*button ajouter photo du modale principale*/
 .modal-footer {
-  margin-top: 20px;
   text-align: center;
 }
 
+.modal-footer::before {
+  content: "";
+  display: block;
+  width: 420px;
+  height: 1px;
+  background-color: #b3b3b3;
+  margin: 0 auto 35px auto; 
+}
+
+
 #ajouter-photo-btn {
   padding: 10px 20px;
+  width: 237px;
+  height: 36px;
+  margin-bottom: 45px;
   background-color: #1d6154;
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 60px;
   cursor: pointer;
   font-size: 1rem;
 }
 
+/*formulaire pour ajouter les photos du modale secondaire add-modale*/
 .formulaire-ajout {
-  position: relative;
   display: flex;
-  flex-direction: column; /* Important pour un affichage vertical */
-  gap: 16px; /* Espace entre les éléments */
-  padding: 46px;
+  flex-direction: column; 
+  gap: 16px; 
+  padding: 35px 46px;
   margin: 0 94px;
-  border-top: 1px solid #b3b3b3; /* remplace pseudo-élément */
-  background-color: #fff; /* Optionnel : couleur de fond */
-}
-
-.hidden {
-  display: none;
+  background-color: #fff; 
 }
 
 .modale-form {
@@ -310,7 +319,7 @@ li:hover {
   gap: 12px;
   border: 2px dashed #ccc;
   padding: 20px;
-  background-color: #f6f6f6;
+  background-color: #E8F1F6;
 }
 
 .modale-form-logo-image {
@@ -364,14 +373,26 @@ select {
   font-size: 1rem;
 }
 
+ .submit-form-btn::before{
+  content: "";
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+  height: 1px;
+  background-color: #b3b3b3;
+ }
+
 .submit-form-btn {
+  position: relative;
   width: 237px;
   height: 36px;
   margin: 0 auto;
   background-color: #1d6154;
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 60px;
   cursor: pointer;
   font-size: 1rem;
 }
@@ -381,11 +402,19 @@ label {
   margin-bottom: 4px;
 }
 
-.close-btn {
+.close-btn, .add-close-btn {
   position: absolute;
   right: 25px;
   top: 25px;
-  font-size: 24px;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+i.fa-solid.fa-arrow-left {
+ position: absolute;
+  left: 25px;
+  top: 25px;
+  font-size: 17px;
   cursor: pointer;
 }
 

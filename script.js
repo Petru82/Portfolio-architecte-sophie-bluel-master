@@ -1,318 +1,334 @@
-// Config
-const API_URL = "http://localhost:5678/api/works";
-const CATEGORIES_URL = "http://localhost:5678/api/categories";
-const loged = window.localStorage.getItem("token");
+// ==== CONFIGURATION ====
+// Déclaration des URLs de l'API dans un objet centralisé
+const API = {
+  WORKS: "http://localhost:5678/api/works",
+  CATEGORIES: "http://localhost:5678/api/categories"
+};
 
-// Éléments DOM
-let navLogin, containerFilters, gallery;
+// Récupération du token (null si non connecté)
+const TOKEN = localStorage.getItem("token");
 
-function toggleEditVisibility() {
-  const editSpan = document.querySelector(".galerie-editeur");
-  if (!editSpan) return;
-  editSpan.classList.toggle("none", !loged);
-}
+// ==== RÉFÉRENCES DOM ====
+// Éléments principaux de la page
+const navLogin = document.querySelector(".login");                    // Bouton login/logout
+const containerFilters = document.querySelector(".filter-form");     // Conteneur des filtres
+const gallery = document.querySelector(".gallery");                  // Galerie des projets
 
-// Auth
+// Modale principale d'édition
+const modal = document.getElementById("modal");                      // Modale d’édition
+const modalBody = document.getElementById("modal-body");             // Contenu modale d’édition
+const editBtn = document.getElementById("edit-btn");                 // Bouton "modifier"
+const closeModalBtn = document.querySelector(".close-btn");         // Bouton fermeture modale
+
+// Modale d'ajout de projet
+const addModal = document.getElementById("add-modal");               // Fenêtre modale d'ajout
+const addForm = document.getElementById("add-form");                 // Formulaire d'ajout
+const fileInput = document.getElementById("image");                  // Champ fichier image
+const titleInput = document.getElementById("title");                 // Champ titre du projet
+const imagePreview = document.getElementById("image-preview");       // Aperçu de l’image
+const categorySelect = document.getElementById("category");          // Menu déroulant catégories
+const addPhotoBtn = document.getElementById("ajouter-photo-btn");    // Bouton ajouter photo
+const closeAddModalBtn = document.querySelector(".add-close-btn");  // Bouton fermeture modale ajout
+const backToMainModal = document.getElementById("back-to-main-modal"); // Flèche retour modale
+
+// ==== GLOBAL STATE ====
+// Variable globale pour stocker tous les projets (mise à jour dynamique)
+let projects = [];
+
+// ==== AUTH ====
+// Gère le bouton login/logout et la déconnexion
 function setupAuth() {
-  navLogin = document.querySelector(".login");
   if (!navLogin) return;
 
-  navLogin.textContent = loged ? "logout" : "login";
+  // Affiche "logout" si connecté, sinon "login"
+  navLogin.textContent = TOKEN ? "logout" : "login";
 
+  // Gestion du clic sur le bouton
   navLogin.addEventListener("click", (e) => {
-    if (loged) {
+    if (TOKEN) {
       e.preventDefault();
-      localStorage.removeItem("token");
-      window.location.href = "login.html";
+      localStorage.removeItem("token");  // Déconnexion
+      window.location.href = "login.html"; // Redirection vers la page de login
     }
   });
 }
 
-// Projets
-async function getProjects() {
+// Affiche ou masque le mode édition si connecté
+function toggleEditVisibility() {
+  const editSpan = document.querySelector(".galerie-editeur");
+  if (editSpan) editSpan.classList.toggle("none", !TOKEN);
+}
+
+// ==== API CALLS ====
+// Fonction utilitaire pour faire des requêtes GET
+async function fetchJSON(url) {
   try {
-    const response = await fetch(API_URL);
-    return await response.json();
-  } catch (error) {
-    console.error("Erreur getProjects:", error);
+    const res = await fetch(url);
+    return await res.json(); // Retourne le JSON si succès
+  } catch (err) {
+    console.error(`Erreur de requête vers ${url} :`, err);
     return [];
   }
 }
 
-function renderProjects(projects) {
-  gallery.innerHTML = projects
-    .map(
-      (project) => `
-      <div class="project" data-id="${project.id}">
-        <img src="${project.imageUrl}" alt="${project.title}">
-        <h3>${project.title}</h3>
-        ${project.description ? `<p>${project.description}</p>` : ""}
-      </div>
-    `
-    )
-    .join("");
+// Appels spécifiques aux ressources
+async function getProjects() {
+  return await fetchJSON(API.WORKS);
 }
 
-// Suppression de travaux existants
-
-async function deleteWork(workId, figureElement) {
-  const isConfirmed = confirm("Voulez-vous vraiment supprimer ce travail ?");
-  if (!isConfirmed) return;
-
-  const token = localStorage.getItem("token");
-  if (!token) {
-    console.error("Token non trouvé. Vous n'êtes pas connecté.");
-    return;
-  }
-
-  try {
-    const response = await fetch(`${API_URL}/${workId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(
-        text || `Échec de la suppression (statut ${response.status})`
-      );
-    }
-
-    figureElement.remove(); // Supprime l'élément du DOM
-    console.log(`Projet ${workId} supprimé.`);
-
-    // Actualise la galerie après suppression
-    const projects = await getProjects();
-    renderProjects(projects);
-  } catch (error) {
-    console.error("Erreur:", error.message);
-    alert("Erreur lors de la suppression.");
-  }
+async function getCategories() {
+  return await fetchJSON(API.CATEGORIES);
 }
 
-//Modale
-// Ouvre la modale au clic sur "modifier"
-document
-  .getElementById("edit-btn")
-  .addEventListener("click", openModalWithGalleryImages);
-
-// Ferme la modale au clic sur la croix
-document.querySelector(".close-btn").addEventListener("click", function () {
-  document.getElementById("modal").style.display = "none";
-});
-
-// Ferme la modale au clic en dehors du contenu
-window.addEventListener("click", function (event) {
-  const modal = document.getElementById("modal");
-  if (event.target === modal) {
-    modal.style.display = "none";
-  }
-});
-
-function openModalWithGalleryImages() {
-  const modal = document.getElementById("modal");
-  const modalBody = document.getElementById("modal-body");
-
-  // Récupère toutes les images de la galerie
-  const projects = document.querySelectorAll(".gallery .project");
-
-  // Construit le HTML avec toutes les images en miniature
-  modalBody.innerHTML = Array.from(projects)
-    .map((project) => {
-      const img = project.querySelector("img");
-      const projectId = project.dataset.id; // Assure-toi que chaque projet a un data-id
-      return `
-        <div class="image-container" data-id="${projectId}">
-          <img src="${img.src}" alt="${img.alt}">
-          <span class="trash-icon" data-id="${projectId}"><i class="fa-solid fa-trash"></i></span>
-        </div>
-      `;
-    })
-    .join("");
-
-  modal.style.display = "flex";
-
-  // Gestion de la suppression dans la modale
-  modalBody.querySelectorAll(".trash-icon").forEach((icon) => {
-    icon.onclick = async (event) => {
-      event.stopPropagation();
-      const projectId = icon.dataset.id;
-      const projectElement = document.querySelector(
-        `.project[data-id="${projectId}"]`
-      );
-      await deleteWork(projectId, projectElement); // Supprime côté serveur et DOM
-      icon.parentElement.remove(); // Supprime la miniature de la modale
-    };
-  });
+// ==== RENDERING ====
+// Affiche les projets dans la galerie
+function renderProjects(projectsList) {
+  gallery.innerHTML = projectsList.map(p => `
+    <div class="project" data-id="${p.id}">
+      <img src="${p.imageUrl}" alt="${p.title}">
+      <h3>${p.title}</h3>
+      ${p.description ? `<p>${p.description}</p>` : ""}
+    </div>
+  `).join("");
 }
 
-// Filtres
-// Visibilité des filtres
-function toggleFiltersVisibility() {
-  if (!containerFilters) return;
-  containerFilters.style.display = loged ? "none" : "block";
-}
-
-async function createFilters() {
-  const categories = await fetch(CATEGORIES_URL).then((r) => r.json());
-
+// Génère les boutons de filtre selon les catégories
+function renderFilters(categories) {
   containerFilters.innerHTML = `
     <button data-filter="all">Tous</button>
-    ${categories
-      .map((cat) => `<button data-filter="${cat.id}">${cat.name}</button>`)
-      .join("")}
+    ${categories.map(c => `<button data-filter="${c.id}">${c.name}</button>`).join("")}
   `;
 }
 
-let projects = []; // Déclare projects en variable globale
-// Initialisation
-async function init() {
-  // Éléments DOM
-  navLogin = document.querySelector(".login");
-  containerFilters = document.querySelector(".filter-form");
-  gallery = document.querySelector(".gallery");
-
-  if (!containerFilters || !gallery) {
-    console.error("Éléments DOM manquants");
-    return;
+// ==== FILTERS ====
+// Affiche les filtres uniquement si l'utilisateur n'est pas connecté
+function toggleFiltersVisibility() {
+  if (containerFilters) {
+    containerFilters.style.display = TOKEN ? "none" : "block";
   }
+}
 
-  await createFilters();
-  toggleFiltersVisibility(); // Contrôle initial de visibilité
-  toggleEditVisibility();
-
-  projects = await getProjects(); // Utilise la variable globale
-  renderProjects(projects);
-
-  // Gestion filtres
+// Gère le comportement de filtrage lorsqu’un bouton est cliqué
+function setupFilters() {
   containerFilters.addEventListener("click", (e) => {
     const filter = e.target.dataset.filter;
     if (!filter) return;
 
-    const filtered =
-      filter === "all"
-        ? projects
-        : projects.filter((p) => p.category.id.toString() === filter);
-
+    // Filtrage selon l'ID de catégorie ou affichage de tout
+    const filtered = filter === "all" ? projects : projects.filter(p => p.category.id.toString() === filter);
     renderProjects(filtered);
   });
 }
 
-// Chargement
-document.addEventListener("DOMContentLoaded", () => {
-  setupAuth();
-  init();
-});
+// ==== MODAL ====
+// Ouvre la modale avec les miniatures des projets et boutons de suppression
+function openModal() {
+  // Génère les miniatures depuis la galerie existante
+  const thumbnails = Array.from(document.querySelectorAll(".gallery .project")).map(project => {
+    const img = project.querySelector("img");
+    const id = project.dataset.id;
+    return `
+      <div class="image-container" data-id="${id}">
+        <img src="${img.src}" alt="${img.alt}">
+        <span class="trash-icon" data-id="${id}"><i class="fa-solid fa-trash"></i></span>
+      </div>`;
+  }).join("");
 
-// DOM pour la modale d'ajout
-const addModal = document.getElementById("add-modal");
-const addForm = document.getElementById("add-form");
-const fileInput = document.getElementById("image");
-const title = document.getElementById("title");
-const imagePreview = document.getElementById("image-preview");
-const categorySelect = document.getElementById("category");
-const addPhoto = document.getElementById("ajouter-photo-btn");
-const closeAddModal = document.querySelector(".add-close-btn");
+  // Injection HTML dans la modale
+  modalBody.innerHTML = thumbnails;
+  modal.style.display = "flex";
 
-function displayModal() {
-  if (loged) {
-    addPhoto.addEventListener("click", (e) => {
-      e.stopPropagation();
-      modal.style.display = "none"; // Masquer le modal principal
-      addModal.classList.remove("hidden");
-      addModal.style.display = "flex";
+  // Gestion du clic sur les icônes de suppression
+  modalBody.querySelectorAll(".trash-icon").forEach(icon => {
+    icon.onclick = async () => {
+      const id = icon.dataset.id;
+      const elem = document.querySelector(`.project[data-id="${id}"]`);
+      await deleteWork(id, elem);
+      icon.parentElement.remove(); // Supprime aussi la miniature de la modale
+    };
+  });
+}
+
+// Initialise les événements de la modale d'édition
+function setupModal() {
+  editBtn.addEventListener("click", openModal);
+  closeModalBtn.addEventListener("click", () => DOM.modal.style.display = "none");
+
+  // Fermeture en cliquant à l'extérieur
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) DOM.modal.style.display = "none";
+    if (e.target === addModal) closeAddModal();
+  });
+}
+
+// ==== DELETE PROJECT ====
+// Supprime un projet depuis l’API + DOM
+async function deleteWork(id, element) {
+  if (!confirm("Supprimer ce projet ?")) return;
+  if (!TOKEN) return alert("Non connecté");
+
+  try {
+    const res = await fetch(`${API.WORKS}/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${TOKEN}` },
     });
 
-    //  Fermer la modale d'ajout
-    closeAddModal.addEventListener("click", () => {
-      addModal.style.display = "none";
-      addModal.classList.add("hidden");
-    });
+    if (!res.ok) throw new Error(`Erreur serveur: ${res.status}`);
 
-    //  Fermer modale d'ajout si on clique en dehors
-    window.addEventListener("click", (event) => {
-      if (event.target === addModal) {
-        addModal.style.display = "none";
-        addModal.classList.add("hidden");
-      }
-    });
+    element.remove(); // Supprime du DOM
+    projects = await getProjects(); // Recharge la liste complète
+    renderProjects(projects);       // Réaffiche la galerie
+  } catch (err) {
+    console.error("Erreur suppression:", err);
   }
 }
 
-displayModal();
-addProject();
+// ==== ADD PROJECT ====
+// Initialise les interactions liées à la modale d’ajout de projet
+function setupAddModal() {
+  // Si l'utilisateur n'est pas connecté, on n'autorise pas l'accès à la modale
+  if (!TOKEN) return;
 
-function addProject() {
-  // Preview de l'image
+  // Lorsque l'utilisateur clique sur le bouton "Ajouter une photo"
+  addPhotoBtn.addEventListener("click", () => {
+    // On masque la modale principale (celle de la galerie)
+    modal.style.display = "none";
+
+    // On affiche la modale d'ajout de projet
+    addModal.classList.remove("none"); // Retire la classe qui masque l'élément
+    addModal.style.display = "flex";    // Affiche la modale en flex
+  });
+
+  // Gestion du clic sur le bouton de fermeture de la modale d'ajout
+ closeAddModalBtn.addEventListener("click", closeAddModal);
+}
+
+// Ferme proprement la modale d’ajout de projet
+function closeAddModal() {
+  addModal.style.display = "none";       // Cache l'élément via CSS
+  addModal.classList.add("none");      // Rajoute la classe pour garder la cohérence
+}
+
+  // Gestion du clic sur la flèche "retour"
+  backToMainModal.addEventListener("click", () => {
+    addModal.style.display = "none";      // Cache la modale d'ajout
+    addModal.classList.add("none");     // Restaure l’état masqué
+    modal.style.display = "flex";         // Réaffiche la modale principale
+  });
+
+
+// Initialise le formulaire d'ajout (prévisualisation, catégories, soumission)
+function setupAddForm() {
+
+  // === PRÉVISUALISATION DE L'IMAGE ===
   fileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]; // Récupère le fichier sélectionné
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader(); // Crée un objet pour lire le fichier
       reader.onload = (ev) => {
-        imagePreview.innerHTML = `<img src="${ev.target.result}" alt="Preview" style="max-height:150px;">`;
+        // Affiche un aperçu de l’image (base64)
+        imagePreview.innerHTML = `<img src="${ev.target.result}" style="max-height:150px;">`;
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // Lit le fichier comme une URL base64
     }
   });
 
-  // Charger dynamiquement les catégories
-  async function populateCategories() {
-    try {
-      console.log("Token utilisé :", loged);
-      const resp = await fetch(CATEGORIES_URL);
-      const cats = await resp.json();
-      categorySelect.innerHTML = cats
-        .map((c) => `<option value="${c.id}">${c.name}</option>`)
-        .join("");
-      console.log("Catégories chargées:", cats);
-    } catch (err) {
-      console.error("Erreur catégories:", err);
-    }
-  }
-  populateCategories();
+  // === CHARGEMENT DES CATÉGORIES DANS LE FORMULAIRE ===
+  getCategories().then(cats => {
+    // Génère dynamiquement les options du menu déroulant avec les catégories
+    categorySelect.innerHTML = cats.map(c => 
+      `<option value="${c.id}">${c.name}</option>`
+    ).join("");
+  });
 
-  // Soumission du formulaire
+  // === ENVOI DU FORMULAIRE D'AJOUT ===
   addForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const title = document.getElementById("title").value.trim();
-    const categoryId = categorySelect.value;
-    const imageFile = fileInput.files[0];
+    e.preventDefault(); // Empêche le rechargement de la page
 
-    if (!imageFile || !title || !categoryId) {
-      console.warn("Tous les champs sont requis.");
-      return;
+    // Récupère les valeurs du formulaire
+    const title = titleInput.value.trim();          // Titre
+    const categoryId = categorySelect.value;        // ID de la catégorie
+    const imageFile = fileInput.files[0];           // Image sélectionnée
+
+    // Vérifie que tous les champs sont remplis
+    if (!title || !categoryId || !imageFile) {
+      return alert("Tous les champs sont requis");
     }
 
+    // Création d'un objet FormData pour l'envoi multipart/form-data
     const formData = new FormData();
-    formData.append("image", imageFile);
-    formData.append("title", title);
-    formData.append("category", categoryId);
-
-    console.log("Envoi des données :", { title, categoryId, imageFile });
+    formData.append("image", imageFile);     // Image
+    formData.append("title", title);         // Titre
+    formData.append("category", categoryId); // Catégorie (ID)
 
     try {
-      const resp = await fetch(API_URL, {
+      // Envoie la requête POST à l'API avec le token d'authentification
+      const res = await fetch(API.WORKS, {
         method: "POST",
-        headers: { Authorization: `Bearer ${loged}` },
-        body: formData,
+        headers: { Authorization: `Bearer ${TOKEN}` },
+        body: formData, // FormData automatiquement géré par fetch
       });
 
-      if (!resp.ok) {
-        const errData = await resp.json();
-        throw new Error(errData.message || `Erreur ${resp.status}`);
-      }
+      // Vérifie si la requête a échoué
+      if (!res.ok) throw new Error("Échec ajout projet");
 
-      const newProject = await resp.json();
-      console.log("Succès ajout projet :", newProject);
+      // Récupère le projet fraîchement ajouté depuis la réponse
+      const newProject = await res.json();
 
+      // Ajoute le nouveau projet à la liste globale
       projects.push(newProject);
+
+      // Rafraîchit l’affichage de la galerie
       renderProjects(projects);
+
+      // Réinitialise le formulaire et l'aperçu d'image
       addForm.reset();
       imagePreview.innerHTML = "";
-      addModal.style.display = "none";
-      addModal.classList.add("hidden");
+
+      // Ferme la modale d'ajout après succès
+      closeAddModal();
     } catch (err) {
-      console.error("Échec de l’ajout :", err);
+      console.error("Erreur ajout projet:", err);
     }
   });
 }
+
+// ==== INITIALISATION ====
+// Fonction principale d'initialisation de l'application
+async function init() {
+  // Vérifie que les éléments DOM essentiels existent (la galerie et les filtres)
+  if (!gallery || !containerFilters)
+    return console.error("Éléments DOM manquants");
+
+  // 1. Gère l'état de connexion (affiche "login" ou "logout" selon le token)
+  setupAuth();
+
+  // 2. Affiche ou masque l'élément "Modifier" si l'utilisateur est connecté
+  toggleEditVisibility();
+
+  // 3. Affiche ou masque la barre de filtres selon si l'utilisateur est connecté ou non
+  toggleFiltersVisibility();
+
+  // 4. Initialise les interactions avec la modale de gestion des projets
+  setupModal();
+
+  // 5. Prépare les interactions avec la modale d'ajout de projet
+  setupAddModal();
+
+  // 6. Prépare le formulaire d'ajout de projet (preview, soumission, etc.)
+  setupAddForm();
+
+  // 7. Récupère les catégories depuis l’API et les affiche dans les filtres
+  const categories = await getCategories();
+  renderFilters(categories);
+
+  // 8. Récupère tous les projets depuis l’API et les affiche dans la galerie
+  projects = await getProjects();
+  renderProjects(projects);
+
+  // 9. Active les filtres : écoute les clics sur les boutons de filtre
+  setupFilters();
+}
+
+// Exécute la fonction `init` une fois que tout le contenu HTML est chargé
+document.addEventListener("DOMContentLoaded", init);

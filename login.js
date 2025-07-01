@@ -52,3 +52,27 @@ if (loginForm) {
   });
 }
 
+function setupAuth() {
+  const navLogin = document.querySelector(".login");
+
+  if (!navLogin) return;
+
+  const TOKEN = localStorage.getItem("token");
+
+  // Affiche "logout" si connecté, sinon "login"
+  navLogin.textContent = TOKEN ? "logout" : "login";
+
+  // Gestion du clic
+  navLogin.addEventListener("click", (e) => {
+    if (TOKEN) {
+      e.preventDefault();
+      localStorage.removeItem("token");  // Déconnexion
+      window.location.href = "login.html"; // Redirection vers page login
+    }
+  });
+}
+
+// Initialiser quand le DOM est prêt
+document.addEventListener("DOMContentLoaded", () => {
+  setupAuth();
+});

@@ -35,24 +35,6 @@ const backToMainModal = document.getElementById("back-to-main-modal"); // Flèch
 // Variable globale pour stocker tous les projets (mise à jour dynamique)
 let projects = [];
 
-// ==== AUTH ====
-// Gère le bouton login/logout et la déconnexion
-function setupAuth() {
-  if (!navLogin) return;
-
-  // Affiche "logout" si connecté, sinon "login"
-  navLogin.textContent = TOKEN ? "logout" : "login";
-
-  // Gestion du clic sur le bouton
-  navLogin.addEventListener("click", (e) => {
-    if (TOKEN) {
-      e.preventDefault();
-      localStorage.removeItem("token");  // Déconnexion
-      window.location.href = "login.html"; // Redirection vers la page de login
-    }
-  });
-}
-
 // Affiche ou masque le mode édition si connecté
 function toggleEditVisibility() {
   const editSpan = document.querySelector(".galerie-editeur");
@@ -152,11 +134,11 @@ function openModal() {
 // Initialise les événements de la modale d'édition
 function setupModal() {
   editBtn.addEventListener("click", openModal);
-  closeModalBtn.addEventListener("click", () => DOM.modal.style.display = "none");
+  closeModalBtn.addEventListener("click", () => modal.style.display = "none");
 
   // Fermeture en cliquant à l'extérieur
   window.addEventListener("click", (e) => {
-    if (e.target === modal) DOM.modal.style.display = "none";
+    if (e.target === modal) modal.style.display = "none";
     if (e.target === addModal) closeAddModal();
   });
 }
@@ -300,33 +282,30 @@ async function init() {
   if (!gallery || !containerFilters)
     return console.error("Éléments DOM manquants");
 
-  // 1. Gère l'état de connexion (affiche "login" ou "logout" selon le token)
-  setupAuth();
-
-  // 2. Affiche ou masque l'élément "Modifier" si l'utilisateur est connecté
+  // 1. Affiche ou masque l'élément "Modifier" si l'utilisateur est connecté
   toggleEditVisibility();
 
-  // 3. Affiche ou masque la barre de filtres selon si l'utilisateur est connecté ou non
+  // 2. Affiche ou masque la barre de filtres selon si l'utilisateur est connecté ou non
   toggleFiltersVisibility();
 
-  // 4. Initialise les interactions avec la modale de gestion des projets
+  // 3. Initialise les interactions avec la modale de gestion des projets
   setupModal();
 
-  // 5. Prépare les interactions avec la modale d'ajout de projet
+  // 4. Prépare les interactions avec la modale d'ajout de projet
   setupAddModal();
 
-  // 6. Prépare le formulaire d'ajout de projet (preview, soumission, etc.)
+  // 5. Prépare le formulaire d'ajout de projet (preview, soumission, etc.)
   setupAddForm();
 
-  // 7. Récupère les catégories depuis l’API et les affiche dans les filtres
+  // 6. Récupère les catégories depuis l’API et les affiche dans les filtres
   const categories = await getCategories();
   renderFilters(categories);
 
-  // 8. Récupère tous les projets depuis l’API et les affiche dans la galerie
+  // 7. Récupère tous les projets depuis l’API et les affiche dans la galerie
   projects = await getProjects();
   renderProjects(projects);
 
-  // 9. Active les filtres : écoute les clics sur les boutons de filtre
+  // 8. Active les filtres : écoute les clics sur les boutons de filtre
   setupFilters();
 }
 

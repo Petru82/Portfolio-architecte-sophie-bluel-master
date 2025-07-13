@@ -77,8 +77,8 @@ function renderProjects(projectsList) {
 // Génère les boutons de filtre selon les catégories
 function renderFilters(categories) {
   containerFilters.innerHTML = `
-    <button data-filter="all">Tous</button>
-    ${categories.map(c => `<button data-filter="${c.id}">${c.name}</button>`).join("")}
+    <button type="button" data-filter="all">Tous</button>
+    ${categories.map(c => `<button type="button" data-filter="${c.id}">${c.name}</button>`).join("")}
   `;
 }
 
@@ -93,12 +93,18 @@ function toggleFiltersVisibility() {
 // Gère le comportement de filtrage lorsqu’un bouton est cliqué
 function setupFilters() {
   containerFilters.addEventListener("click", (e) => {
-    const filter = e.target.dataset.filter;
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const filter = btn.dataset.filter;
     if (!filter) return;
 
-    // Filtrage selon l'ID de catégorie ou affichage de tout
-    const filtered = filter === "all" ? projects : projects.filter(p => p.category.id.toString() === filter);
-    renderProjects(filtered);
+    // Filtrage
+    if (filter === "all") {
+      renderProjects(projects); // Affiche tous les projets
+    } else {
+      const filtered = projects.filter(p => p.categoryId == filter);
+      renderProjects(filtered);
+    }
   });
 }
 
@@ -192,14 +198,16 @@ function closeAddModal() {
 }
 
   // Gestion du clic sur la flèche "retour"
-  backToMainModal.addEventListener("click", () => {
-    addModal.style.display = "none";      // Cache la modale d'ajout
-    addModal.classList.add("none");     // Restaure l’état masqué
-    modal.style.display = "flex";         // Réaffiche la modale principale
-  });
 
+  if (backToMainModal) { // Si l'élément n'existe
+    backToMainModal.addEventListener("click", () => {
+      addModal.style.display = "none";      // Cache la modale d'ajout
+      addModal.classList.add("none");     // Restaure l’état masqué
+      modal.style.display = "flex";         // Réaffiche la modale principale
+    });
+  }
 
-// Initialise le formulaire d'ajout (prévisualisation, catégories, soumission)
+  // Initialise le formulaire d'ajout (prévisualisation, catégories, soumission)
 function setupAddForm() {
 
   // === PRÉVISUALISATION DE L'IMAGE ===
@@ -257,8 +265,8 @@ function setupAddForm() {
       // Récupère le projet fraîchement ajouté depuis la réponse
       const newProject = await res.json();
 
-      // Ajoute le nouveau projet à la liste globale
-      projects.push(newProject);
+     // Recharge la liste complète depuis l’API après ajout
+      projects = await getProjects();
 
       // Rafraîchit l’affichage de la galerie
       renderProjects(projects);
@@ -278,34 +286,26 @@ function setupAddForm() {
 // ==== INITIALISATION ====
 // Fonction principale d'initialisation de l'application
 async function init() {
-  // Vérifie que les éléments DOM essentiels existent (la galerie et les filtres)
-  if (!gallery || !containerFilters)
-    return console.error("Éléments DOM manquants");
+  if (!gallery || !containerFilters) return;
 
-  // 1. Affiche ou masque l'élément "Modifier" si l'utilisateur est connecté
   toggleEditVisibility();
-
-  // 2. Affiche ou masque la barre de filtres selon si l'utilisateur est connecté ou non
   toggleFiltersVisibility();
-
-  // 3. Initialise les interactions avec la modale de gestion des projets
   setupModal();
-
-  // 4. Prépare les interactions avec la modale d'ajout de projet
   setupAddModal();
-
-  // 5. Prépare le formulaire d'ajout de projet (preview, soumission, etc.)
   setupAddForm();
 
-  // 6. Récupère les catégories depuis l’API et les affiche dans les filtres
+  // 1. Récupère tous les projets d'abord
+  projects = await getProjects();
+  console.log("Projets récupérés :", projects);
+
+     // 2. Récupère les catégories et génère les filtres
   const categories = await getCategories();
   renderFilters(categories);
 
-  // 7. Récupère tous les projets depuis l’API et les affiche dans la galerie
-  projects = await getProjects();
+  // 3. Affiche tous les projets
   renderProjects(projects);
 
-  // 8. Active les filtres : écoute les clics sur les boutons de filtre
+  // 4. Attache l'écouteur de filtre
   setupFilters();
 }
 

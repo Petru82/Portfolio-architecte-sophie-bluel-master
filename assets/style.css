@@ -140,7 +140,7 @@ header {
   margin: 50px 0;
 }
 section {
-  margin: 50px 0;
+  margin: 50px 0 140px 0;
 }
 
 h1 {
@@ -169,14 +169,45 @@ nav ul {
   align-items: center;
   list-style-type: none;
 }
-nav li {
+nav li,
+nav a {
   padding: 0 10px;
   font-size: 1.2em;
+  text-decoration: none;
+  color: black;
+  width: 55px;
+  height: 19px;
 }
 
 li:hover {
-  color: #b1663c;
+  font-weight: bold;
+  cursor: pointer;
 }
+
+a:hover {
+ font-weight: bold;
+}
+
+nav img {
+  width: 22px;
+  height: 22px;
+}
+
+footer nav ul {
+  display: flex;
+  justify-content: flex-end;
+  padding: 2em;
+  margin-top: 330px;
+}
+
+footer nav li {
+  width: 109px;
+  height: 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+
 #introduction {
   display: flex;
   align-items: center;
@@ -206,7 +237,7 @@ li:hover {
   justify-content: center;
   align-items: center;
   gap: 30px;
-  margin-bottom: 90px;
+  margin-bottom: 51px;
 }
 
 .gallery {
@@ -464,9 +495,11 @@ i.fa-solid.fa-arrow-left {
   font-size: 10px;
 }
 
+/* Log In formulaire */
 #contact {
-  width: 50%;
+  width: 379px;
   margin: auto;
+  
 }
 
 #contact > * {
@@ -484,15 +517,23 @@ i.fa-solid.fa-arrow-left {
   flex-direction: column;
 }
 
+#contact form a {
+  display: flex;
+  justify-content: center;
+  color: #3D3D3D;
+}
+
 #contact input {
   height: 50px;
   font-size: 1.2em;
   border: none;
   box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
 }
+
 #contact label {
   margin: 2em 0 1em 0;
 }
+
 #contact textarea {
   border: none;
   box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
@@ -507,43 +548,7 @@ input[type="submit"] {
   width: 180px;
   text-align: center;
   border-radius: 60px;
-}
-
-footer nav ul {
-  display: flex;
-  justify-content: flex-end;
-  margin: 2em;
-}
-
-/* Log In formulaire */
-
-#contact.login-form {
-  width: 379px;
-}
-
-#contact.login-form h2 {
-  width: 100px;
-  height: 36px;
-  margin: auto;
-}
-
-#contact.login-form input {
-  height: 51px;
-  padding: 0;
-}
-
-#contact.login-form label:hover {
-  text-decoration: underline;
-}
-
-#contact.login-form input[type="submit"] {
-  width: 179px;
-  height: 36px;
-}
-
-#contact.login-form a {
-  width: 139px;
-  margin: auto;
+  height: 36px !important;
 }
 
 /* Style du formulaire */
@@ -568,3 +573,5 @@ footer nav ul {
   background-color: #1d6154;
   color: #fff;
 }
+
+
